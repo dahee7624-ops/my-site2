@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍔 붕붕 햄버거 CEO - 6학년 사회 실시간 경영 & 모의 구매 계산기</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        burgerYellow: '#FFCA28',
+                        burgerBrown: '#5D4037',
+                        burgerRed: '#E53935',
+                        burgerGreen: '#2E7D32',
+                        burgerBg: '#FFFDE7',
+                        darkPitch: '#090D16',
+                    },
+                    fontFamily: {
+                        jua: ['Jua', 'sans-serif'],
+                        blackHan: ['Black Han Sans', 'sans-serif'],
+                        nanum: ['Nanum Gothic', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            background-color: #FEF9C3;
+            background-image: radial-gradient(#FDE047 2px, transparent 2px);
+            background-size: 28px 28px;
+        }
+        .font-jua { font-family: 'Jua', sans-serif; }
+        .font-black-han { font-family: 'Black Han Sans', 'Jua', sans-serif; }
+        
+        /* Highlighting Paint Effects */
+        .paint-yellow {
+            background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+            box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+        }
+        .paint-green {
+            background: linear-gradient(120deg, #bbf7d0 0%, #4ade80 100%);
+            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+        }
+        .paint-red {
+            background: linear-gradient(120deg, #fecaca 0%, #f87171 100%);
+            box-shadow: 0 4px 15px rgba(248, 113, 113, 0.4);
+        }
+        .paint-blue {
+            background: linear-gradient(120deg, #bae6fd 0%, #38bdf8 100%);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .nowrap-cell {
+            white-space: nowrap !important;
+        }
+
+        /* TV Glow Effect for 1st Place */
+        .glow-gold {
+            box-shadow: 0 0 25px #F59E0B, inset 0 0 15px #FBBF24;
+        }
+
+        .badge-pulse {
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #1E293B; }
+        ::-webkit-scrollbar-thumb { background: #EAB308; border-radius: 6px; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 pb-16 flex flex-col">
+
+    <header class="bg-gradient-to-r from-red-600 via-amber-500 to-yellow-500 text-white shadow-2xl sticky top-0 z-40 border-b-4 border-amber-600">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <span class="text-5xl animate-bounce">🍔</span>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black-han tracking-wider flex items-center gap-3">
+                        붕붕 햄버거 CEO 
+                        <span class="text-sm sm:text-base bg-white text-red-600 px-3 py-1 rounded-full font-bold shadow-md">6학년 사회 모의 경영</span>
+                    </h1>
+                    <p class="text-sm sm:text-base opacity-95 font-bold">기업의 합리적 선택 : 최소 비용으로 최대 이윤 창출하기!</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openQrModal()" class="bg-amber-100 text-amber-950 hover:bg-white font-jua text-base sm:text-lg px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shadow-lg border-2 border-amber-300">
+                    <i class="fa-solid fa-qrcode text-xl text-red-600"></i>
+                    <span>📱 모의 구매 QR/링크</span>
+                </button>
+                <button onclick="toggleLearningModal()" class="bg-yellow-100 text-amber-950 hover:bg-white font-jua text-base sm:text-lg px-4 py-2.5 rounded-2xl transition flex items-center gap-2 shadow-lg border-2 border-amber-300">
+                    <i class="fa-solid fa-lightbulb text-xl text-yellow-600"></i>
+                    <span>학습 개념</span>
+                </button>
+                <button onclick="openPresenterMode()" class="bg-red-800 hover:bg-red-900 text-yellow-300 font-jua text-base sm:text-lg px-5 py-2.5 rounded-2xl transition flex items-center gap-2 shadow-xl border-2 border-red-600">
+                    <i class="fa-solid fa-tv text-2xl"></i>
+                    <span>교실 전광판 발표</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-8 flex-grow w-full">
+        
+        <!-- Top Market Stats Banner -->
+        <div class="bg-white rounded-3xl p-6 mb-8 border-4 border-amber-400 shadow-xl flex flex-wrap justify-around items-center gap-6 text-center">
+            <div class="flex items-center gap-4">
+                <div class="bg-amber-100 p-4 rounded-2xl text-amber-800 text-3xl"><i class="fa-solid fa-store"></i></div>
+                <div class="text-left">
+                    <div class="text-sm text-gray-600 font-bold">참여 모둠</div>
+                    <div class="text-2xl sm:text-3xl font-jua text-amber-950">5개 모둠</div>
+                </div>
+            </div>
+            <div class="w-px h-12 bg-amber-300 hidden sm:block"></div>
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-100 p-4 rounded-2xl text-blue-700 text-3xl"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="text-left">
+                    <div class="text-sm text-gray-600 font-bold">시장 총 매출액</div>
+                    <div class="text-2xl sm:text-3xl font-jua text-blue-700" id="total-market-sales">0 원</div>
+                </div>
+            </div>
+            <div class="w-px h-12 bg-amber-300 hidden sm:block"></div>
+            <div class="flex items-center gap-4">
+                <div class="bg-emerald-100 p-4 rounded-2xl text-emerald-700 text-3xl"><i class="fa-solid fa-trophy"></i></div>
+                <div class="text-left">
+                    <div class="text-sm text-gray-600 font-bold">현재 1위 모둠 (최대 이윤)</div>
+                    <div class="text-2xl sm:text-3xl font-jua text-emerald-700" id="top-team-name">구매 대기 중</div>
+                </div>
+            </div>
+            <button onclick="triggerConfetti()" class="ml-auto bg-amber-400 hover:bg-amber-500 text-amber-950 font-jua text-lg px-4 py-3 rounded-2xl shadow-md transition flex items-center gap-2">
+                🎉 축하 폭죽
+            </button>
+        </div>
+
+        <section class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-amber-400 shadow-2xl mb-12">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b-4 border-amber-200 gap-4">
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-black-han text-amber-950 flex items-center gap-3">
+                        <i class="fa-solid fa-calculator text-red-500"></i>
+                        실시간 경영 현황 및 정산
+                    </h2>
+                    <p class="text-base text-gray-600 font-bold mt-1">교실 뒤쪽에서도 한눈에 보이는 실시간 모둠별 경영 성과 카드</p>
+                </div>
+                <!-- Group Tabs Selector -->
+                <div class="flex flex-wrap gap-2" id="group-tabs">
+                    <button onclick="selectGroupTab('all')" id="tab-btn-all" class="group-tab-btn active font-jua text-lg px-4 py-2 rounded-2xl bg-amber-500 text-white shadow-md border-2 border-amber-600 transition">
+                        전체 모둠 한눈에 보기
+                    </button>
+                    <button onclick="selectGroupTab(1)" id="tab-btn-1" class="group-tab-btn font-jua text-lg px-4 py-2 rounded-2xl bg-amber-100 text-amber-900 hover:bg-amber-200 border-2 border-amber-300 transition">
+                        1모둠
+                    </button>
+                    <button onclick="selectGroupTab(2)" id="tab-btn-2" class="group-tab-btn font-jua text-lg px-4 py-2 rounded-2xl bg-amber-100 text-amber-900 hover:bg-amber-200 border-2 border-amber-300 transition">
+                        2모둠
+                    </button>
+                    <button onclick="selectGroupTab(3)" id="tab-btn-3" class="group-tab-btn font-jua text-lg px-4 py-2 rounded-2xl bg-amber-100 text-amber-900 hover:bg-amber-200 border-2 border-amber-300 transition">
+                        3모둠
+                    </button>
+                    <button onclick="selectGroupTab(4)" id="tab-btn-4" class="group-tab-btn font-jua text-lg px-4 py-2 rounded-2xl bg-amber-100 text-amber-900 hover:bg-amber-200 border-2 border-amber-300 transition">
+                        4모둠
+                    </button>
+                    <button onclick="selectGroupTab(5)" id="tab-btn-5" class="group-tab-btn font-jua text-lg px-4 py-2 rounded-2xl bg-amber-100 text-amber-900 hover:bg-amber-200 border-2 border-amber-300 transition">
+                        5모둠
+                    </button>
+                </div>
+            </div>
+
+            <!-- Group Management Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="teams-container">
+                <!-- Dynamically Populated Cards -->
+            </div>
+        </section>
+
+        <!-- Hall of Fame Leaderboard -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-amber-400 shadow-2xl mb-12">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 pb-6 border-b-4 border-amber-200 gap-4">
+                <div class="flex items-center gap-4">
+                    <span class="text-5xl">🏆</span>
+                    <div>
+                        <h3 class="text-3xl sm:text-4xl font-black-han text-amber-950">명예의 전당 (실시간 순위)</h3>
+                        <p class="text-base text-gray-600 font-bold mt-1">카테고리별 버튼을 눌러 부문별 우수 모둠을 확인하세요!</p>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Category Tabs -->
+                <div class="flex flex-wrap gap-3 bg-amber-100 p-2 rounded-2xl border-2 border-amber-300">
+                    <button onclick="changeLeaderboardCategory('profit')" id="lead-cat-profit" class="font-jua text-lg sm:text-xl px-5 py-2.5 rounded-xl bg-amber-500 text-white shadow-md transition flex items-center gap-2">
+                        <span>💰 순이익 순위</span>
+                    </button>
+                    <button onclick="changeLeaderboardCategory('sales')" id="lead-cat-sales" class="font-jua text-lg sm:text-xl px-5 py-2.5 rounded-xl bg-white text-amber-900 hover:bg-amber-200 transition flex items-center gap-2">
+                        <span>💵 총 매출액 순위</span>
+                    </button>
+                    <button onclick="changeLeaderboardCategory('qty')" id="lead-cat-qty" class="font-jua text-lg sm:text-xl px-5 py-2.5 rounded-xl bg-white text-amber-900 hover:bg-amber-200 transition flex items-center gap-2">
+                        <span>📦 판매 수량 순위</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Leaderboard Table with Ultra-Large Typography -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-amber-100 text-amber-950 font-jua text-xl sm:text-2xl border-b-4 border-amber-300">
+                            <th class="p-4 text-center rounded-l-2xl nowrap-cell">순위</th>
+                            <th class="p-4 nowrap-cell">모둠 / 가게 이름</th>
+                            <th class="p-4 text-center nowrap-cell">1개당 원가/판매가</th>
+                            <th class="p-4 text-right nowrap-cell" id="th-sales">총 매출액 (원)</th>
+                            <th class="p-4 text-center nowrap-cell" id="th-qty">판매 수량 (개)</th>
+                            <th class="p-4 text-right nowrap-cell" id="th-profit">순이익 (이윤)</th>
+                            <th class="p-4 text-center rounded-r-2xl nowrap-cell">수익률</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y-2 divide-amber-100 font-bold text-lg sm:text-xl">
+                        <!-- Dynamic Leaderboard Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Customer Live Purchase Portal Simulation Section -->
+        <section class="bg-amber-500/10 rounded-3xl p-6 sm:p-8 border-4 border-amber-400 shadow-xl mb-12">
+            <div class="flex items-center gap-4 mb-6">
+                <span class="text-4xl">📱</span>
+                <div>
+                    <h3 class="text-3xl font-black-han text-amber-950">손님 모의 구매 시뮬레이터 (학생/학부모 화면 미리보기)</h3>
+                    <p class="text-base text-amber-900 font-bold">스마트폰으로 QR을 찍고 입장했을 때 학생들이 보는 2만원 예산 구매 창입니다.</p>
+                </div>
+            </div>
+
+            <!-- Buyer Login / Profile Header -->
+            <div class="bg-white rounded-3xl p-6 border-4 border-amber-300 mb-6 shadow-md flex flex-wrap justify-between items-center gap-4">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="font-jua text-xl text-amber-950">구매자 프로필:</span>
+                    <select id="buyer-role" onchange="updateBuyerProfile()" class="font-jua text-lg bg-amber-100 border-2 border-amber-400 rounded-xl px-3 py-2 text-amber-900 focus:outline-none">
+                        <option value="student-1">학생 (1모둠 소속)</option>
+                        <option value="student-2">학생 (2모둠 소속)</option>
+                        <option value="student-3" selected>학생 (3모둠 소속)</option>
+                        <option value="student-4">학생 (4모둠 소속)</option>
+                        <option value="student-5">학생 (5모둠 소속)</option>
+                        <option value="parent">학부모님 (제한 없음)</option>
+                        <option value="teacher">선생님 (제한 없음)</option>
+                    </select>
+                    <input type="text" id="buyer-name" value="김손님" onchange="updateBuyerProfile()" class="font-jua text-lg bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-2 w-36 text-amber-950 focus:outline-none" placeholder="이름 입력">
+                </div>
+
+                <div class="bg-emerald-100 border-2 border-emerald-400 px-6 py-2.5 rounded-2xl flex items-center gap-3 shadow-inner">
+                    <i class="fa-solid fa-wallet text-2xl text-emerald-700"></i>
+                    <div>
+                        <div class="text-xs font-bold text-emerald-800">나의 남아있는 예산</div>
+                        <div class="font-black-han text-2xl text-emerald-700" id="buyer-budget-display">20,000 원</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buyer Hamburger Market Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8" id="buyer-market-grid">
+                <!-- Dynamic Market Items -->
+            </div>
+
+            <!-- Customer Purchase History / Receipt Panel -->
+            <div class="bg-white rounded-3xl p-6 border-4 border-amber-300 shadow-md">
+                <h4 class="font-black-han text-2xl text-amber-950 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-receipt text-red-500"></i> 나의 실시간 모의 구매 영수증
+                </h4>
+                <div id="buyer-receipt-list" class="space-y-2 max-h-48 overflow-y-auto text-base font-bold text-gray-700">
+                    <p class="text-gray-400 font-normal">아직 구매한 햄버거가 없습니다. 위 모둠에서 햄버거를 구매해 보세요!</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- QR Code Modal -->
+    <div id="qr-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border-4 border-amber-400 relative text-center">
+            <button onclick="closeQrModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
+            <span class="text-5xl">📱</span>
+            <h3 class="text-3xl font-black-han text-amber-950 mt-2">모의 구매 QR 코드</h3>
+            <p class="text-base text-gray-600 font-bold mb-6">스마트폰 카메라인식 후 접속하여 햄버거를 모의 구매하세요!</p>
+
+            <!-- Generated QRCode Holder -->
+            <div class="flex justify-center mb-6">
+                <div id="qrcode-box" class="p-4 bg-white border-4 border-amber-300 rounded-2xl shadow-inner"></div>
+            </div>
+
+            <!-- Copyable URL Input -->
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-gray-500 text-left">접속 URL 주소 직접 복사</label>
+                <div class="flex gap-2">
+                    <input type="text" id="share-url-input" readonly class="w-full bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-2 text-sm font-mono text-gray-700">
+                    <button onclick="copyShareUrl()" class="bg-amber-500 hover:bg-amber-600 text-white font-jua text-base px-4 py-2 rounded-xl transition whitespace-nowrap shadow-md">
+                        주소 복사
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Concept Modal -->
+    <div id="learning-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border-4 border-amber-400 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="toggleLearningModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-3xl font-bold">&times;</button>
+            <div class="text-center mb-6">
+                <span class="text-6xl">💡</span>
+                <h3 class="text-3xl font-black-han text-amber-950 mt-2">기업의 합리적 선택 핵심 핵심</h3>
+                <p class="text-base text-amber-800 font-bold">6학년 사회 단원 개념 정리</p>
+            </div>
+
+            <div class="space-y-4 text-base font-medium text-gray-800">
+                <div class="bg-amber-50 p-5 rounded-2xl border-2 border-amber-200">
+                    <h4 class="font-jua text-2xl text-amber-950 mb-2">💰 1. 순이익(이윤) 공식</h4>
+                    <p class="text-base leading-relaxed text-gray-800">
+                        • <strong>총 매출액</strong> = 햄버거 1개 판매가격 × 팔린 개수<br>
+                        • <strong>총 원가(비용)</strong> = 햄버거 1개 재료비/제작비 × 팔린 개수<br>
+                        • <strong class="text-red-600 font-bold">순이익 = 총 매출액 - 총 원가</strong>
+                    </p>
+                </div>
+
+                <div class="bg-amber-50 p-5 rounded-2xl border-2 border-amber-200">
+                    <h4 class="font-jua text-2xl text-amber-950 mb-2">🎯 2. 합리적 선택이란?</h4>
+                    <p class="text-base leading-relaxed text-gray-800">
+                        기업은 <strong>가장 적은 비용(원가)으로 최대의 이윤(순이익)</strong>을 남기고자 합니다. 가격이 너무 비싸면 안 팔리고, 너무 싸면 이윤이 남지 않으므로 적정한 판매가를 찾는 것이 핵심입니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <button onclick="toggleLearningModal()" class="bg-amber-500 hover:bg-amber-600 text-white font-jua text-xl px-8 py-3 rounded-2xl shadow-lg transition">
+                    확인했습니다!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pitch-Black TV Presenter Mode Overlay -->
+    <div id="presenter-modal" class="fixed inset-0 bg-darkPitch z-50 flex flex-col hidden p-6 sm:p-10 text-white overflow-y-auto">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center mb-8 max-w-7xl mx-auto w-full border-b-2 border-amber-500/40 pb-6">
+            <div class="flex items-center gap-4">
+                <span class="text-5xl">📺</span>
+                <div>
+                    <h2 class="text-4xl sm:text-5xl font-black-han text-amber-400 tracking-wider">교실 TV 전광판 발표 모드</h2>
+                    <p class="text-base sm:text-lg text-amber-200/80 font-bold">교실 뒤편(10m+)에서도 선명하게 보이는 5개 모둠 대형 정산판</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="triggerConfetti()" class="bg-amber-500 hover:bg-amber-600 text-amber-950 font-jua text-xl px-5 py-3 rounded-2xl transition shadow-lg">
+                    🎉 폭죽 축하
+                </button>
+                <button onclick="closePresenterMode()" class="bg-red-600 hover:bg-red-700 text-white font-jua text-xl px-5 py-3 rounded-2xl transition shadow-lg">
+                    <i class="fa-solid fa-xmark"></i> 닫기
+                </button>
+            </div>
+        </div>
+
+        <!-- TV Ranking Category Filter Tabs -->
+        <div class="max-w-7xl mx-auto w-full flex justify-center gap-4 mb-8">
+            <button onclick="changeTvCategory('profit')" id="tv-cat-profit" class="font-jua text-2xl px-6 py-3 rounded-2xl bg-amber-500 text-amber-950 shadow-xl transition">
+                💰 순이익 순위
+            </button>
+            <button onclick="changeTvCategory('sales')" id="tv-cat-sales" class="font-jua text-2xl px-6 py-3 rounded-2xl bg-slate-800 text-amber-200 border-2 border-slate-700 transition">
+                💵 총 매출액 순위
+            </button>
+            <button onclick="changeTvCategory('qty')" id="tv-cat-qty" class="font-jua text-2xl px-6 py-3 rounded-2xl bg-slate-800 text-amber-200 border-2 border-slate-700 transition">
+                📦 판매 수량 순위
+            </button>
+        </div>
+
+        <!-- TV Ultra-Large Cards Grid -->
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-5 gap-6 my-auto" id="presenter-cards">
+            <!-- Dynamically Rendered TV Presenter Cards -->
+        </div>
+
+        <div class="max-w-7xl mx-auto w-full text-center mt-10 text-amber-300 font-jua text-3xl">
+            🏆 최고 영예 모둠: <span id="presenter-winner" class="text-yellow-400 font-black-han text-4xl border-b-4 border-yellow-400 px-3">계산 중...</span>
+        </div>
+    </div>
+
+    <script>
+        // Initial 5 Groups Data
+        const DEFAULT_TEAMS = [
+            { id: 1, name: '1모둠 버거', icon: '🍔', cost: 3000, price: 5000, qty: 0 },
+            { id: 2, name: '2모둠 버거', icon: '🍟', cost: 2500, price: 4500, qty: 0 },
+            { id: 3, name: '3모둠 버거', icon: '🥤', cost: 3500, price: 6000, qty: 0 },
+            { id: 4, name: '4모둠 버거', icon: '👑', cost: 2000, price: 4000, qty: 0 },
+            { id: 5, name: '5모둠 버거', icon: '✨', cost: 4000, price: 5500, qty: 0 }
+        ];
+
+        let teams = JSON.parse(localStorage.getItem('burger_ceo_v2_teams')) || DEFAULT_TEAMS;
+        
+        // Buyer State
+        let currentRole = 'student-3';
+        let currentBuyerName = '김손님';
+        let buyerBudget = 20000;
+        let myReceipts = [];
+
+        // Active View State
+        let selectedGroupTab = 'all'; // 'all' or 1~5
+        let currentLeaderboardCat = 'profit'; // 'profit', 'sales', 'qty'
+        let currentTvCat = 'profit';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTeamCards();
+            renderBuyerMarket();
+            updateAllCalculations();
+            setupShareUrl();
+        });
+
+        function saveData() {
+            localStorage.setItem('burger_ceo_v2_teams', JSON.stringify(teams));
+        }
+
+        // Setup share URL string
+        function setupShareUrl() {
+            const currentUrl = window.location.href;
+            document.getElementById('share-url-input').value = currentUrl;
+        }
+
+        function renderTeamCards() {
+            const container = document.getElementById('teams-container');
+            container.innerHTML = '';
+
+            teams.forEach((team, index) => {
+                // Filter by group tab
+                if (selectedGroupTab !== 'all' && selectedGroupTab !== team.id) {
+                    return;
+                }
+
+                const cardHtml = `
+                    <div class="bg-amber-50/50 rounded-3xl p-6 border-4 border-amber-300 shadow-xl flex flex-col justify-between ${selectedGroupTab !== 'all' ? 'col-span-full max-w-3xl mx-auto w-full' : ''}">
+                        <!-- Group Header -->
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b-4 border-amber-200">
+                            <div class="flex items-center gap-3">
+                                <span class="text-5xl">${team.icon}</span>
+                                <div>
+                                    <span class="text-sm font-bold text-amber-700 block">Group ${team.id}</span>
+                                    <input type="text" 
+                                           value="${escapeHtml(team.name)}" 
+                                           onchange="updateTeamField(${index}, 'name', this.value)"
+                                           class="font-jua text-2xl text-amber-950 bg-transparent border-b-2 border-dashed border-amber-400 focus:border-red-500 focus:outline-none px-1 w-44"
+                                           placeholder="모둠 이름">
+                                </div>
+                            </div>
+                            <span class="bg-amber-500 text-white font-jua text-xl px-4 py-1.5 rounded-2xl shadow-sm">
+                                ${team.id}모둠
+                            </span>
+                        </div>
+
+                        <!-- Editable Cost/Price & Live Quantity -->
+                        <div class="space-y-4 mb-6">
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="bg-white p-3 rounded-2xl border-2 border-amber-200">
+                                    <span class="font-bold text-gray-500 block text-xs">🍔 1개당 제작원가</span>
+                                    <div class="flex items-center justify-end font-bold text-lg text-amber-900 mt-1">
+                                        <input type="number" min="0" step="100" value="${team.cost}"
+                                               oninput="updateTeamField(${index}, 'cost', this.value)"
+                                               class="w-full text-right bg-amber-50 border border-amber-300 rounded-lg px-2 py-1 font-jua focus:outline-none">
+                                        <span class="ml-1">원</span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-3 rounded-2xl border-2 border-amber-200">
+                                    <span class="font-bold text-gray-500 block text-xs">🏷️ 1개당 판매가격</span>
+                                    <div class="flex items-center justify-end font-bold text-lg text-amber-900 mt-1">
+                                        <input type="number" min="0" step="100" value="${team.price}"
+                                               oninput="updateTeamField(${index}, 'price', this.value)"
+                                               class="w-full text-right bg-amber-50 border border-amber-300 rounded-lg px-2 py-1 font-jua focus:outline-none">
+                                        <span class="ml-1">원</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="paint-yellow p-4 rounded-2xl border-2 border-amber-400 text-center">
+                                <span class="font-jua text-lg text-amber-950 block">📦 실시간 누적 판매 수량</span>
+                                <div class="font-black-han text-4xl sm:text-5xl text-amber-950 mt-1">
+                                    ${team.qty} <span class="text-2xl font-jua">개</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Computed Output Card with Vibrant Highlighters -->
+                        <div class="space-y-3" id="team-calc-${index}">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        function selectGroupTab(groupId) {
+            selectedGroupTab = groupId;
+            
+            document.querySelectorAll('.group-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-white', 'shadow-md');
+                btn.classList.add('bg-amber-100', 'text-amber-900');
+            });
+
+            const activeBtn = document.getElementById(`tab-btn-${groupId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-amber-100', 'text-amber-900');
+                activeBtn.classList.add('bg-amber-500', 'text-white', 'shadow-md');
+            }
+
+            renderTeamCards();
+            updateAllCalculations();
+        }
+
+        function updateTeamField(index, field, value) {
+            if (field === 'name') {
+                teams[index].name = value;
+            } else {
+                teams[index][field] = Math.max(0, parseFloat(value) || 0);
+            }
+            saveData();
+            updateAllCalculations();
+            renderBuyerMarket();
+        }
+
+        function updateAllCalculations() {
+            let totalMarketSales = 0;
+
+            teams.forEach((team, index) => {
+                const sales = team.price * team.qty;
+                const totalCost = team.cost * team.qty;
+                const profit = sales - totalCost;
+                const marginRate = sales > 0 ? ((profit / sales) * 100).toFixed(1) : '0.0';
+
+                totalMarketSales += sales;
+
+                const calcBox = document.getElementById(`team-calc-${index}`);
+                if (!calcBox) return;
+
+                let profitBadge = '';
+                let profitStyle = '';
+
+                if (profit > 0) {
+                    profitBadge = `<span class="bg-emerald-600 text-white font-jua text-sm px-3 py-1 rounded-full shadow">🎉 흑자 이윤</span>`;
+                    profitStyle = `paint-green border-2 border-emerald-500 text-emerald-950`;
+                } else if (profit === 0) {
+                    profitBadge = `<span class="bg-gray-500 text-white font-jua text-sm px-3 py-1 rounded-full">⚖️ 본전 0원</span>`;
+                    profitStyle = `bg-gray-100 border-2 border-gray-300 text-gray-800`;
+                } else {
+                    profitBadge = `<span class="bg-red-600 text-white font-jua text-sm px-3 py-1 rounded-full badge-pulse">😭 적자 손해</span>`;
+                    profitStyle = `paint-red border-2 border-red-400 text-red-950`;
+                }
+
+                calcBox.innerHTML = `
+                    <div class="paint-blue p-3 rounded-2xl border border-sky-300 flex justify-between items-center">
+                        <span class="font-jua text-base text-sky-950">총 매출액</span>
+                        <span class="font-black-han text-2xl text-sky-950">${sales.toLocaleString()} 원</span>
+                    </div>
+                    <div class="${profitStyle} p-4 rounded-2xl flex flex-col gap-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-jua text-lg">최종 순이익</span>
+                            ${profitBadge}
+                        </div>
+                        <div class="font-black-han text-3xl sm:text-4xl text-right mt-1">
+                            ${profit > 0 ? '+' : ''}${profit.toLocaleString()} 원
+                        </div>
+                        <div class="text-right text-xs font-bold opacity-80">
+                            수익률: ${marginRate}%
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('total-market-sales').innerText = `${totalMarketSales.toLocaleString()} 원`;
+
+            // Sort logic
+            const sortedTeams = [...teams].map(t => {
+                const sales = t.price * t.qty;
+                const totalCost = t.cost * t.qty;
+                const profit = sales - totalCost;
+                const rate = sales > 0 ? (profit / sales) * 100 : 0;
+                return { ...t, sales, totalCost, profit, rate };
+            });
+
+            if (currentLeaderboardCat === 'sales') {
+                sortedTeams.sort((a, b) => b.sales - a.sales);
+            } else if (currentLeaderboardCat === 'qty') {
+                sortedTeams.sort((a, b) => b.qty - a.qty);
+            } else {
+                sortedTeams.sort((a, b) => b.profit - a.profit);
+            }
+
+            // Top team indicator
+            const topProfitTeam = [...sortedTeams].sort((a, b) => b.profit - a.profit)[0];
+            if (topProfitTeam && topProfitTeam.profit > 0) {
+                document.getElementById('top-team-name').innerText = `${topProfitTeam.name} (+${topProfitTeam.profit.toLocaleString()}원)`;
+            } else {
+                document.getElementById('top-team-name').innerText = '구매 진행 중';
+            }
+
+            renderLeaderboard(sortedTeams);
+            renderPresenterCards();
+        }
+
+        function changeLeaderboardCategory(cat) {
+            currentLeaderboardCat = cat;
+            
+            ['profit', 'sales', 'qty'].forEach(c => {
+                const btn = document.getElementById(`lead-cat-${c}`);
+                if (c === cat) {
+                    btn.className = "font-jua text-lg sm:text-xl px-5 py-2.5 rounded-xl bg-amber-500 text-white shadow-md flex items-center gap-2";
+                } else {
+                    btn.className = "font-jua text-lg sm:text-xl px-5 py-2.5 rounded-xl bg-white text-amber-900 hover:bg-amber-200 transition flex items-center gap-2";
+                }
+            });
+
+            updateAllCalculations();
+        }
+
+        function renderLeaderboard(sortedTeams) {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            sortedTeams.forEach((team, rank) => {
+                let rankBadge = '';
+                if (rank === 0) rankBadge = '🥇 1위';
+                else if (rank === 1) rankBadge = '🥈 2위';
+                else if (rank === 2) rankBadge = '🥉 3위';
+                else rankBadge = `${rank + 1}위`;
+
+                const row = `
+                    <tr class="${rank === 0 ? 'bg-amber-100/80 font-black' : 'hover:bg-amber-50'} transition">
+                        <td class="p-4 text-center font-jua text-2xl text-amber-950 ${rank === 0 ? 'scale-110 font-bold' : ''}">${rankBadge}</td>
+                        <td class="p-4 font-black-han text-2xl text-amber-950 flex items-center gap-3">
+                            <span class="text-3xl">${team.icon}</span>
+                            <span>${escapeHtml(team.name)}</span>
+                        </td>
+                        <td class="p-4 text-center text-sm font-bold text-gray-600">
+                            원가: ${team.cost.toLocaleString()}원<br>판매가: ${team.price.toLocaleString()}원
+                        </td>
+                        <td class="p-4 text-right font-black-han text-2xl text-sky-800 ${currentLeaderboardCat === 'sales' ? 'paint-yellow rounded-xl' : ''}">
+                            ${team.sales.toLocaleString()} 원
+                        </td>
+                        <td class="p-4 text-center font-black-han text-3xl text-amber-900 ${currentLeaderboardCat === 'qty' ? 'paint-yellow rounded-xl' : ''}">
+                            ${team.qty} 개
+                        </td>
+                        <td class="p-4 text-right font-black-han text-3xl ${team.profit >= 0 ? 'text-emerald-700' : 'text-red-600'} ${currentLeaderboardCat === 'profit' ? 'paint-green rounded-xl' : ''}">
+                            ${team.profit > 0 ? '+' : ''}${team.profit.toLocaleString()} 원
+                        </td>
+                        <td class="p-4 text-center font-bold text-lg text-amber-900">
+                            ${team.rate.toFixed(1)}%
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function updateBuyerProfile() {
+            currentRole = document.getElementById('buyer-role').value;
+            currentBuyerName = document.getElementById('buyer-name').value || '김손님';
+            renderBuyerMarket();
+        }
+
+        function renderBuyerMarket() {
+            const container = document.getElementById('buyer-market-grid');
+            container.innerHTML = '';
+
+            teams.forEach((team, index) => {
+                let isMyGroup = false;
+                if (currentRole.startsWith('student-')) {
+                    const studentGroupId = parseInt(currentRole.split('-')[1]);
+                    if (studentGroupId === team.id) {
+                        isMyGroup = true;
+                    }
+                }
+
+                const card = `
+                    <div class="bg-white rounded-3xl p-5 border-4 ${isMyGroup ? 'border-gray-300 opacity-80' : 'border-amber-300'} shadow-md flex flex-col justify-between text-center">
+                        <div>
+                            <span class="text-5xl block mb-2">${team.icon}</span>
+                            <h4 class="font-jua text-xl text-amber-950">${escapeHtml(team.name)}</h4>
+                            <div class="font-black-han text-2xl text-amber-900 mt-1">${team.price.toLocaleString()} 원</div>
+                        </div>
+
+                        <div class="mt-4 space-y-2">
+                            ${isMyGroup ? `
+                                <button disabled class="w-full bg-gray-300 text-gray-600 font-jua text-base py-2.5 rounded-2xl cursor-not-allowed">
+                                    🚫 내 모둠 (구매 불가)
+                                </button>
+                            ` : `
+                                <button onclick="buyHamburger(${index})" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-jua text-lg py-2.5 rounded-2xl transition shadow-md flex items-center justify-center gap-1">
+                                    🛒 1개 구매하기
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        function buyHamburger(teamIndex) {
+            const team = teams[teamIndex];
+            
+            if (buyerBudget < team.price) {
+                alert(`⚠️ 예산이 부족합니다! (현재 잔액: ${buyerBudget.toLocaleString()}원 / 필요 금액: ${team.price.toLocaleString()}원)`);
+                return;
+            }
+
+            // Deduct Budget & Increment Quantity
+            buyerBudget -= team.price;
+            team.qty += 1;
+
+            // Log Receipt
+            myReceipts.unshift({
+                time: new Date().toLocaleTimeString(),
+                teamName: team.name,
+                price: team.price
+            });
+
+            // Sync
+            saveData();
+            updateAllCalculations();
+            renderTeamCards();
+            renderBuyerMarket();
+
+            // Update UI
+            document.getElementById('buyer-budget-display').innerText = `${buyerBudget.toLocaleString()} 원`;
+            renderBuyerReceipts();
+        }
+
+        function renderBuyerReceipts() {
+            const list = document.getElementById('buyer-receipt-list');
+            if (myReceipts.length === 0) {
+                list.innerHTML = `<p class="text-gray-400 font-normal">아직 구매한 햄버거가 없습니다.</p>`;
+                return;
+            }
+
+            list.innerHTML = myReceipts.map(r => `
+                <div class="flex justify-between items-center bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                    <span class="text-xs text-gray-500">${r.time}</span>
+                    <span class="font-jua text-amber-950">${r.teamName} 1개</span>
+                    <span class="font-bold text-emerald-700">-${r.price.toLocaleString()}원</span>
+                </div>
+            `).join('');
+        }
+
+        function changeTvCategory(cat) {
+            currentTvCat = cat;
+            
+            ['profit', 'sales', 'qty'].forEach(c => {
+                const btn = document.getElementById(`tv-cat-${c}`);
+                if (c === cat) {
+                    btn.className = "font-jua text-2xl px-6 py-3 rounded-2xl bg-amber-500 text-amber-950 shadow-xl transition";
+                } else {
+                    btn.className = "font-jua text-2xl px-6 py-3 rounded-2xl bg-slate-800 text-amber-200 border-2 border-slate-700 transition";
+                }
+            });
+
+            renderPresenterCards();
+        }
+
+        function renderPresenterCards() {
+            const container = document.getElementById('presenter-cards');
+            container.innerHTML = '';
+
+            const sortedTeams = [...teams].map(t => {
+                const sales = t.price * t.qty;
+                const totalCost = t.cost * t.qty;
+                const profit = sales - totalCost;
+                return { ...t, sales, totalCost, profit };
+            });
+
+            if (currentTvCat === 'sales') sortedTeams.sort((a, b) => b.sales - a.sales);
+            else if (currentTvCat === 'qty') sortedTeams.sort((a, b) => b.qty - a.qty);
+            else sortedTeams.sort((a, b) => b.profit - a.profit);
+
+            sortedTeams.forEach((team, rank) => {
+                const isWinner = rank === 0;
+
+                const card = `
+                    <div class="bg-slate-900 border-4 ${isWinner ? 'border-yellow-400 glow-gold scale-105' : 'border-slate-700'} rounded-3xl p-5 flex flex-col justify-between text-center relative">
+                        ${isWinner ? '<span class="absolute -top-5 left-1/2 -translate-x-1/2 bg-yellow-400 text-slate-950 font-black-han text-lg px-4 py-1 rounded-full shadow-2xl">👑 부문 1위 모둠</span>' : ''}
+                        
+                        <div>
+                            <div class="text-6xl mb-2">${team.icon}</div>
+                            <h4 class="font-black-han text-3xl text-amber-300 truncate">${escapeHtml(team.name)}</h4>
+                        </div>
+
+                        <div class="space-y-3 bg-slate-950/80 rounded-2xl p-4 my-4 border border-slate-800">
+                            <div>
+                                <span class="text-xs font-bold text-sky-400 block">총 매출액</span>
+                                <span class="font-black-han text-2xl text-sky-300">${team.sales.toLocaleString()}원</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-amber-400 block">판매 수량</span>
+                                <span class="font-black-han text-3xl text-yellow-300">${team.qty}개</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 block">최종 순이익</span>
+                            <span class="font-black-han text-4xl ${team.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                                ${team.profit > 0 ? '+' : ''}${team.profit.toLocaleString()}원
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', card);
+            });
+
+            if (sortedTeams.length > 0) {
+                document.getElementById('presenter-winner').innerText = `${sortedTeams[0].name}`;
+            }
+        }
+
+        // Modals & Helpers
+        function openQrModal() {
+            document.getElementById('qr-modal').classList.remove('hidden');
+            const qrBox = document.getElementById('qrcode-box');
+            qrBox.innerHTML = '';
+            
+            new QRCode(qrBox, {
+                text: window.location.href,
+                width: 180,
+                height: 180,
+                colorDark: "#5D4037",
+                colorLight: "#ffffff"
+            });
+        }
+
+        function closeQrModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        function copyShareUrl() {
+            const input = document.getElementById('share-url-input');
+            input.select();
+            document.execCommand('copy');
+            alert('📋 모의 구매 URL 주소가 클립보드에 복사되었습니다!');
+        }
+
+        function toggleLearningModal() {
+            document.getElementById('learning-modal').classList.toggle('hidden');
+        }
+
+        function openPresenterMode() {
+            document.getElementById('presenter-modal').classList.remove('hidden');
+            triggerConfetti();
+            renderPresenterCards();
+        }
+
+        function closePresenterMode() {
+            document.getElementById('presenter-modal').classList.add('hidden');
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+            }[m]));
+        }
+    </script>
+</body>
+</html>
